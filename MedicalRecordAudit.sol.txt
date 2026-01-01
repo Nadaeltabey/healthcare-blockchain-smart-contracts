@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract MedicalRecordAudit {
+
+    struct AuditLog {
+        address actor;
+        string action;
+        uint256 timestamp;
+    }
+
+    mapping(address => AuditLog[]) private auditLogs;
+
+    event ActionLogged(address indexed patient, address actor, string action);
+
+    function logAction(address _patient, string memory _action) public {
+        auditLogs[_patient].push(AuditLog(msg.sender, _action, block.timestamp));
+        emit ActionLogged(_patient, msg.sender, _action);
+    }
+
+    function getAuditCount(address _patient) public view returns (uint256) {
+        return auditLogs[_patient].length;
+    }
+}

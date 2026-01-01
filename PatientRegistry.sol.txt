@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract PatientRegistry {
+
+    struct Patient {
+        string patientHash;
+        bool exists;
+    }
+
+    mapping(address => Patient) private patients;
+    mapping(address => mapping(address => bool)) private accessPermissions;
+
+    event PatientRegistered(address patient);
+    event AccessGranted(address patient, address doctor);
+    event AccessRevoked(address patient, address doctor);
+
+    function registerPatient(string memory _patientHash) public {
+        require(!patients[msg.sender].exists, "Patient already registered");
+        patients[msg.sender] = Patient(_patientHash, true);
+        emit PatientRegistered(msg.sender);
+    }
+
+    function grantAccess(address _doctor) public {
+        require(patients[msg.sender].exists, "Patient not registered");
+        accessPermissions[msg.sender][_doctor] = true;
+        emit AccessGranted(msg.sender, _doctor);
+    }
+
+    function revokeAccess(address _doctor) public {
+        accessPermissions[msg.sender][_doctor] = false;
+        emit AccessRevoked(msg.sender, _doctor);
+    }
+
+    function canAccess(address _patient, address _doctor) public view returns (bool) {
+        return accessPermissions[_patient][_doctor];
+    }
+}
